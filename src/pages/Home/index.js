@@ -22,7 +22,7 @@ export default function Home() {
     <Background>
       <Header/>
       <Container>
-        <Nome>Emerson Rodrigues</Nome>
+        <Nome>{user && user.nome}</Nome>
         <Saldo>R$ 125,00</Saldo>
       </Container>
 
