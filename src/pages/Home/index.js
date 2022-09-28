@@ -1,6 +1,7 @@
-import React, { useContext, useState, useEffect }from 'react';
+import React, { useContext, useState, useEffect, }from 'react';
+import { Alert } from 'react-native';
 import firebase from '../../services/firebaseConnection';
-import {format} from 'date-fns'
+import {format, isPast} from 'date-fns'
 
 import {AuthContext} from '../../contexts/auth';
 import Header from '../../components/Header';
@@ -33,7 +34,8 @@ export default function Home() {
           let list = {
             key: childItem.key,
             tipo: childItem.val().tipo,
-            valor: childItem.val().valor
+            valor: childItem.val().valor,
+            date: childItem.val().date,
           };
 
           setHistorico(oldArray=> [...oldArray, list].reverse());
@@ -45,6 +47,47 @@ export default function Home() {
 
     loadList();
   },[]);
+
+  function handleDelete(data){
+    if(isPast(new Date(data.date))){
+      // se a data do registro ja passou vai executar aqui
+      alert('Você não pode excluir um registro antigo!');
+      return;
+    }
+
+    Alert.alert(
+      'Cuidado Atenção!',
+      `Você deseja excluir:
+
+Tipo - ${data.tipo}
+Valor - R$: ${data.valor}`,
+      [
+        {
+          text: 'Cancelar',
+          style: 'cancel'
+        },
+        {
+          text: 'Continuar',
+          onPress: ()=> handleDeleteSucess(data)
+        }
+      ]
+    )
+
+  async function handleDeleteSucess(data){
+      await firebase.database().ref('historico').child(uid).child(data.key).remove()
+      .then( async ()=> {
+        let saldoAtual = saldo;
+        data.tipo === 'despesa' ? saldoAtual += parseFloat(data.valor) : 
+        saldoAtual -= parseFloat(data.valor);
+
+        await firebase.database().ref('users').child(uid).child('saldo').set(saldoAtual);
+      })
+      .catch((error)=>{
+        console.log(error);
+      })
+    }
+
+  }
 
   return (
     <Background>
@@ -59,7 +102,7 @@ export default function Home() {
       showsVerticalScrollIndicator={false}
       data={historico}
       keyExtractor={item=>item.key}
-      renderItem={({item})=> ( <HistoricoList data={item}/> ) }
+      renderItem={({item})=> ( <HistoricoList data={item} deleteItem={handleDelete}/> ) }
       />
     </Background>
   );

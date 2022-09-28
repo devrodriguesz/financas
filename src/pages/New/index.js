@@ -25,7 +25,8 @@ export default function New() {
 
     Alert.alert(
       'Confirmando os dados',
-      `Tipo ${tipo} - Valor ${parseFloat(valor)}`,
+      `Tipo - ${tipo}
+Valor - R$ ${parseFloat(valor)}`,
       [
         {
           text: 'Cancelar',
