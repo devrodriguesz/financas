@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
-import { View, Text, Platform, TouchableOpacity } from 'react-native';
+import { Text, Platform, TouchableOpacity } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
 import { Container, Header,  } from './styles';
-import { setDate } from 'date-fns';
 
 export default function DatePicker({ onClose, date, onChange }) {
     const [dateNow, setDateNow] = useState(new Date(date));
