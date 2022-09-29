@@ -1,13 +1,16 @@
 import React, { useContext, useState, useEffect, }from 'react';
-import { Alert } from 'react-native';
+import { Alert, Platform, TouchableOpacity } from 'react-native';
 import firebase from '../../services/firebaseConnection';
-import {format, isPast} from 'date-fns'
+import { format, isPast } from 'date-fns';
 
 import {AuthContext} from '../../contexts/auth';
 import Header from '../../components/Header';
 import HistoricoList from '../../components/HistoricoList';
 
-import { Background, Container, Nome, Saldo, Title, List } from './styles';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+import DatePicker from '../../components/DatePicker';
+
+import { Background, Container, Nome, Saldo, Title, List, Area } from './styles';
 
 export default function Home() {  
   const [historico, setHistorico] = useState([]);
@@ -16,6 +19,9 @@ export default function Home() {
 
   const { user } = useContext(AuthContext);
   const uid = user && user.uid;
+
+  const [newDate, setNewDate] = useState(new Date());
+  const [show, setShow] = useState(false);
 
   // Carregando as informacoes das transacoes no app
   useEffect(()=> {
@@ -26,7 +32,7 @@ export default function Home() {
 
       await firebase.database().ref('historico')
       .child(uid)
-      .orderByChild('date').equalTo(format(new Date, 'dd/MM/yy'))
+      .orderByChild('date').equalTo(format(newDate, 'dd/MM/yyyy'))
       .limitToLast(10).on('value', (snapshot)=>{
         setHistorico([]);
 
@@ -46,9 +52,10 @@ export default function Home() {
 
 
     loadList();
-  },[]);
+  },[newDate]);
 
   function handleDelete(data){
+    
     if(isPast(new Date(data.date))){
       // se a data do registro ja passou vai executar aqui
       alert('Você não pode excluir um registro antigo!');
@@ -57,10 +64,7 @@ export default function Home() {
 
     Alert.alert(
       'Cuidado Atenção!',
-      `Você deseja excluir:
-
-Tipo - ${data.tipo}
-Valor - R$: ${data.valor}`,
+      `Você deseja excluir ${data.tipo} - Valor: ${data.valor}`,
       [
         {
           text: 'Cancelar',
@@ -72,6 +76,7 @@ Valor - R$: ${data.valor}`,
         }
       ]
     )
+  }
 
   async function handleDeleteSucess(data){
       await firebase.database().ref('historico').child(uid).child(data.key).remove()
@@ -87,7 +92,20 @@ Valor - R$: ${data.valor}`,
       })
     }
 
-  }
+    function handleShowPicker(){
+      setShow(true);
+    }
+
+    function handleClose(){
+      setShow(false);
+    }
+
+    const onChange = (date)=>{
+      setShow(Platform.OS === 'ios');
+      setNewDate(date);
+      //console.log(date);
+    }
+
 
   return (
     <Background>
@@ -97,13 +115,27 @@ Valor - R$: ${data.valor}`,
         <Saldo>R$ {saldo.toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.')}</Saldo>
       </Container>
 
-      <Title>Ultimas movimentaçôes</Title>
+      <Area>
+        <TouchableOpacity onPress={handleShowPicker}>
+          <Icon name="event" color="#FFF" size={30} />
+        </TouchableOpacity>
+        <Title>Ultimas movimentaçôes</Title>
+      </Area>
+
       <List 
       showsVerticalScrollIndicator={false}
       data={historico}
       keyExtractor={item=>item.key}
       renderItem={({item})=> ( <HistoricoList data={item} deleteItem={handleDelete}/> ) }
       />
+
+      {show && (
+        <DatePicker
+        onClose={handleClose}
+        date={newDate}
+        onChange={onChange}
+        />
+      )}
     </Background>
   );
 }
