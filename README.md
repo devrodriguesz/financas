@@ -1,11 +1,11 @@
 # FINANCAS APP
 
-Aplicativo faz a registro de movimentos bancários armazenando registros no firebase com os detalhes.
+Aplicativo faz a registro e consultas de movimentos bancários armazenando os detalhes das transações no firebase.
 
 <img src= "https://user-images.githubusercontent.com/110337546/196049085-5b40d309-2b7f-4023-8d51-2878e3778860.gif" width="250" height="490">
 
 ## 🎯 Sobre
-Este aplicativo faz criação e a autenticação de um novo usuário no firebase, e ao efetuar o login há opções para o usuário fazer registros e realizar consultas das movimentações de dinheiro e .  
+Este aplicativo faz criação e a autenticação de um novo usuário no firebase, e ao efetuar o login há opções para o usuário fazer registros e realizar consultas das movimentações.  
 
 ## 🚀 Tecnologias
 • [React Native](https://reactnative.dev)
